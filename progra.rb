@@ -287,25 +287,120 @@ def ingreso_buscar_autor(cola_autores)
     puts table
     end
 end
+        
+def registro_ventas(cola_autores, cola_ventas)
+    libros = 0
+    autores = 0
+    descuento = 0
+    pilaventa = {
+        tope: nil,
+        cantidad: 0,
+        subtotal: 0,
+        descuento: 0,
+        total: 0,
+        codigo: cola_ventas[:codigo],
+        siguiente: nil
+    }
+    begin
+        puts 'Ingrese el ISBN del libro vendido'
+        puts '(Escriba "salir" para terminar)'
+        isbn = gets.chomp
+        a = buscar_libro(cola_autores, isbn.to_i)
+        if isbn == 'salir'
+            puts 'Resultado:'
+        elsif a == nil
+            puts 'Este libro no existe'
+        elsif a[:existencias] == 0
+            puts 'Las existencias de este libro estan agotadas'
+        else
+            pilaventa[:cantidad] += 1
+            a[:existencias] -= 1
+            libro = buscar(pilaventa, a[:isbn], :isbn)
+            autor = buscar(pilaventa, a[:autor], :autor)
+            if libro == nil
+                elementolibro = {
+                    isbn: a[:isbn],
+                    nombre: a[:nombre],
+                    autor: a[:autor],
+                    precio: a[:precio],
+                    cantidad: 1,
+                    siguiente: pilaventa[:tope]
+                }
+                pilaventa[:tope] = elementolibro
+                libros += 1
+            else
+                libro[:cantidad] += 1
+            end
+            if autor == nil
+                autores += 1
+            end
+            pilaventa[:subtotal] += a[:precio]
+        end
+    end while isbn != 'salir'
+    if libros == 3
+        descuento += 0.1
+    elsif libros > 3
+        descuento += 0.2
+    end
+    if autores >= 3
+        descuento += 0.05
+    end
+    pilaventa[:descuento] = pilaventa[:subtotal]*descuento
+    pilaventa[:total] = pilaventa[:subtotal] - pilaventa[:descuento]
+    puts "Cantidad de libros vendidos: #{pilaventa[:cantidad]}"
+    puts "Subtotal: #{pilaventa[:subtotal]}"
+    puts "Descuento: #{pilaventa[:descuento]}"
+    puts "Total: #{pilaventa[:total]}"
+    puts "Codigo: #{pilaventa[:codigo]}"
+    cola_ventas[:codigo] += 1
 
+    if llena?(cola_ventas) == true
+        cola_ventas[:tope] = cola_ventas[:tope][:siguiente]
+        insertar_cola(cola_ventas, pilaventa)
+    else
+        insertar_cola(cola_ventas, pilaventa)
+    end
+end
 
+def ingreso_buscar_venta(cola_ventas)
+    if vacia?(cola_ventas) == true
+        puts 'La cola de ventas esta vacia'
+        return
+    end
+    puts 'Ingrese el codigo de la venta que desea buscar:'
+    codigo = gets.chomp.to_i
+    a = buscar(cola_ventas, codigo, :codigo)
+    if a == nil
+        puts 'Este codigo no existe o ha sido eliminado'
+    else
+        b = a[:tope]
+        rows = []
+        while b != nil
+            rows << [ b[:cantidad], b[:isbn], b[:nombre], b[:precio]]
+            b = b[:siguiente]
+        end
+        table = Terminal::Table.new :rows => rows
+        table.headings = ['Cantidad', 'ISBN', 'Nombre', 'Precio unitario']
+        table << :separator
+        table.add_row ['', '', 'Subtotal', "Q#{a[:subtotal]}"]
+        table.add_row ['', '', 'Descuento', "Q#{a[:descuento]}"]
+        table.add_row ['', '', 'Total', "Q#{a[:total]}"]
+        puts table
+    end
+end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def listado_ventas(cola_ventas)
+    a = cola_ventas[:tope]
+    rows = []
+    while a != nil
+        rows << [ a[:codigo], a[:cantidad], "Q#{a[:subtotal]}", "Q#{a[:descuento]}", "Q#{a[:total]}"]
+        a = a[:siguiente]
+    end
+    table = Terminal::Table.new :rows => rows
+    table.headings = ['Codigo', 'Cantidad', 'Subtotal', 'Descuento', 'Total']
+    puts table
+end
+    
 begin
     limpiar
     puts 'Bienvenido a la base de datos "Ruby Bookstore"'
