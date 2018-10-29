@@ -416,6 +416,8 @@ begin
     puts ' 8. Buscar una venta'
     puts ' 9. Listado de ventas'
     puts '10. Salir'
+    puts ''
+    puts 'Ingrese una opcion'
 
     n = gets.chomp.to_i
 
