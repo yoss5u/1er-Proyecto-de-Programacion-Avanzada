@@ -368,3 +368,6 @@ begin
         continuar
     end
 end while n != 10
+
+
+#Proyecto terminado
