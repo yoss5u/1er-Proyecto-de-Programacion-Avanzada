@@ -1,3 +1,3 @@
 # 1er-Proyecto-de-Programacion-Avanzada
-Este es el Repositorio del Grupo de programacion Avanzada del primer Proyecto de Jhonny, Douglas, Geovanny y Josué. :v
+Este es el repositorio del grupo de programacion avanzada del primer proyecto de Jhonny, Douglas, Geovanny y Josué. :v
 
